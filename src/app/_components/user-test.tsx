@@ -9,7 +9,6 @@ export default function UserTest() {
 
   return (
     <div>
-      {user?.publicMetadata.role}
       <div>
         <Button onClick={() => mutate()}>Inngest</Button>
       </div>

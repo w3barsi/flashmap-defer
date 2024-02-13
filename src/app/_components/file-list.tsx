@@ -18,7 +18,7 @@ export default function FileList(props: { initialThreads: ThreadType[] }) {
   const utils = api.useUtils();
   const { data: threads } = api.threads.getThreads.useQuery(undefined, {
     initialData: props.initialThreads,
-    staleTime: 10000,
+    refetchInterval: 5000,
   });
   const { mutate } = api.threads.deleteThread.useMutation({
     onSuccess: async () => {
