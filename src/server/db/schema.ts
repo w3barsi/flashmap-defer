@@ -23,7 +23,6 @@ export const test = createTable("test", {
   test: text("test"),
 });
 
-
 export const mindmap = createTable("mindmap", {
   id: text("id", { length: 255 })
     .$defaultFn(() => createId())
@@ -81,8 +80,6 @@ export const threads = createTable("thread", {
     .notNull(),
   updatedAt: int("updated_at", { mode: "timestamp" }),
 });
-
-export type ThreadType = InferSelectModel<typeof threads>
 
 export const files = createTable(
   "file",
