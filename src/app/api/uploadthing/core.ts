@@ -1,11 +1,12 @@
 import { currentUser } from "@clerk/nextjs";
+import { eq } from "drizzle-orm";
 import OpenAI from "openai";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import createCards from "~/defer/createCards";
 import { env } from "~/env";
+import { inngest } from "~/inngest/client";
 import { db } from "~/server/db";
-import { files } from "~/server/db/schema";
+import { files, threads } from "~/server/db/schema";
 
 const f = createUploadthing();
 
@@ -37,7 +38,13 @@ export const ourFileRouter = {
         uploadedBy: metadata.userId,
       });
 
-      await createCards({fileUrl: url, userId: metadata.userId})
+      await inngest.send({
+        name: "flashmap/create.openai-file",
+        data: {
+          fileUrl: url,
+          userId: metadata.userId
+        },
+      });
 
       console.log(">>> end of onUploadComplete");
     }),
