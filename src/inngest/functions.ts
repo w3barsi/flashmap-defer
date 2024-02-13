@@ -36,48 +36,54 @@ export const createFile = inngest.createFunction(
   { id: "create-file" },
   { event: "flashmap/create.openai-file" },
   async ({ event, step }) => {
-    let validatedData;
-    try {
-      validatedData = validateInngestCreateFileInput(event.data);
-    } catch {
-      throw new Error("Invalid shape");
-    }
-    const { fileUrl, userId } = validatedData;
+    const { dbThreadId, fileId } = await step.run(
+      "create-file-step",
+      async () => {
+        let validatedData;
+        try {
+          validatedData = validateInngestCreateFileInput(event.data);
+        } catch {
+          throw new Error("Invalid shape");
+        }
+        const { fileUrl, userId } = validatedData;
 
-    let thread = await db
-      .insert(threads)
-      .values({
-        fileUrl,
-        createdBy: userId,
-      })
-      .returning();
+        let thread = await db
+          .insert(threads)
+          .values({
+            fileUrl,
+            createdBy: userId,
+          })
+          .returning();
 
-    const fileId = await openai.files.create({
-      file: await fetch(thread[0]!.fileUrl),
-      purpose: "assistants",
-    });
+        const fileId = await openai.files.create({
+          file: await fetch(thread[0]!.fileUrl),
+          purpose: "assistants",
+        });
 
-    thread = await db
-      .update(threads)
-      .set({
-        openaiFileId: fileId.id,
-      })
-      .where(eq(threads.id, thread[0]!.id))
-      .returning();
+        thread = await db
+          .update(threads)
+          .set({
+            openaiFileId: fileId.id,
+          })
+          .where(eq(threads.id, thread[0]!.id))
+          .returning();
 
+        return { dbThreadId: thread[0]?.id, fileId: fileId.id };
+      },
+    );
     await step.sendEvent("sendEvent-create-cards", {
       name: "flashmap/create.cards",
       data: {
-        threadId: thread[0]?.id,
-        fileId: fileId.id,
+        threadId: dbThreadId,
+        fileId
       },
     });
 
     await step.sendEvent("sendEvent-create-mindmap", {
       name: "flashmap/create.mindmap",
       data: {
-        threadId: thread[0]?.id,
-        fileId: fileId.id,
+        threadId: dbThreadId,
+        fileId
       },
     });
   },
