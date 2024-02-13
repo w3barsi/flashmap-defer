@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 import { env } from "~/env";
-import { validateThreadShape } from "~/utils/validators";
+import {
+  validateThreadShape,
+  validateInngestCreateFileInput,
+} from "~/utils/validators";
 import { inngest } from "./client";
 import {
   createTitle,
@@ -9,6 +12,9 @@ import {
   updateThreadTitle,
   waitForThreadRun,
 } from "./utils";
+import { db } from "~/server/db";
+import { threads } from "~/server/db/schema";
+import { eq } from "drizzle-orm";
 
 const openai = new OpenAI({
   apiKey: env.OPENAI_KEY,
@@ -25,6 +31,57 @@ const openai = new OpenAI({
 //     return { event, email: event.data.email };
 //   },
 // );
+//
+export const createFile = inngest.createFunction(
+  { id: "create-file" },
+  { event: "flashmap/create.openai-file" },
+  async ({ event, step }) => {
+    let validatedData;
+    try {
+      validatedData = validateInngestCreateFileInput(event.data);
+    } catch {
+      throw new Error("Invalid shape");
+    }
+    const { fileUrl, userId } = validatedData;
+
+    let thread = await db
+      .insert(threads)
+      .values({
+        fileUrl,
+        createdBy: userId,
+      })
+      .returning();
+
+    const fileId = await openai.files.create({
+      file: await fetch(thread[0]!.fileUrl),
+      purpose: "assistants",
+    });
+
+    thread = await db
+      .update(threads)
+      .set({
+        openaiFileId: fileId.id,
+      })
+      .where(eq(threads.id, thread[0]!.id))
+      .returning();
+
+    await step.sendEvent("sendEvent-create-cards", {
+      name: "flashmap/create.cards",
+      data: {
+        threadId: thread[0]?.id,
+        fileId: fileId.id,
+      },
+    });
+
+    await step.sendEvent("sendEvent-create-mindmap", {
+      name: "flashmap/create.mindmap",
+      data: {
+        threadId: thread[0]?.id,
+        fileId: fileId.id,
+      },
+    });
+  },
+);
 
 export const createCards = inngest.createFunction(
   { id: "create-cards" },
@@ -73,7 +130,7 @@ export const createCards = inngest.createFunction(
       await saveCardsToDb(threadId, dbThreadId);
       const titleRunId = await createTitle(threadId);
       await waitForThreadRun(threadId, titleRunId);
-      await updateThreadTitle(threadId, dbThreadId)
+      await updateThreadTitle(threadId, dbThreadId);
     });
   },
 );
@@ -82,7 +139,7 @@ export const createMindmap = inngest.createFunction(
   { id: "create-mindmap" },
   { event: "flashmap/create.mindmap" },
   async ({ event, step }) => {
-    await step.sleep("wait-5-secs", 5000)
+    await step.sleep("wait-5-secs", 5000);
 
     await step.run("create-mindmap", async () => {
       let validatedData;

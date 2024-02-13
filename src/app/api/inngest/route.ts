@@ -1,9 +1,9 @@
 import { serve } from "inngest/next";
 import { inngest } from "~/inngest/client";
-import { createCards, createMindmap } from "~/inngest/functions";
+import { createCards, createFile, createMindmap } from "~/inngest/functions";
 
 // Create an API that serves zero functions
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [createCards, createMindmap],
+  functions: [createCards, createMindmap, createFile],
 });

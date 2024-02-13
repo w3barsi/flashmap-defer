@@ -28,6 +28,7 @@ export const ourFileRouter = {
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
+      console.log(">>> start of onUploadComplete");
       const { key, url, name } = file;
 
       await db.insert(files).values({
@@ -37,55 +38,15 @@ export const ourFileRouter = {
         uploadedBy: metadata.userId,
       });
 
-      let thread = await db
-        .insert(threads)
-        .values({
+      await inngest.send({
+        name: "flashmap/create.openai-file",
+        data: {
           fileUrl: url,
-          createdBy: metadata.userId,
-        })
-        .returning();
-
-
-
-      console.log(">>> CREATING FILE!!!")
-      const fileId = await openai.files.create({
-        file: await fetch(thread[0]!.fileUrl),
-        purpose: "assistants",
-      });
-      console.log("<<< CREATED FILE")
-
-
-      thread = await db
-        .update(threads)
-        .set({
-          openaiFileId: fileId.id,
-        })
-        .where(eq(threads.id, thread[0]!.id))
-        .returning();
-
-      console.log("EXECUTING THREADS")
-      console.log(thread);
-
-
-      console.log(">>> RUNNING INGEST flashmap/create.cards")
-      await inngest.send({
-        name: "flashmap/create.cards",
-        data: {
-          threadId: thread[0]?.id,
-          fileId: fileId.id
-
+          userId: metadata.userId
         },
       });
 
-      console.log(">>> RUNNING INGEST flashmap/create.cards")
-      await inngest.send({
-        name: "flashmap/create.mindmap",
-        data: {
-          threadId: thread[0]?.id,
-          fileId: fileId.id
-
-        },
-      });
+      console.log(">>> end of onUploadComplete");
     }),
 } satisfies FileRouter;
 
