@@ -66,6 +66,8 @@ export const ourFileRouter = {
       console.log("EXECUTING THREADS")
       console.log(thread);
 
+
+      console.log(">>> RUNNING INGEST flashmap/create.cards")
       await inngest.send({
         name: "flashmap/create.cards",
         data: {
@@ -75,6 +77,7 @@ export const ourFileRouter = {
         },
       });
 
+      console.log(">>> RUNNING INGEST flashmap/create.cards")
       await inngest.send({
         name: "flashmap/create.mindmap",
         data: {
@@ -83,8 +86,6 @@ export const ourFileRouter = {
 
         },
       });
-
-      return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
 
