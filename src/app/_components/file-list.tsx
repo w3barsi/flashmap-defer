@@ -10,7 +10,7 @@ import { Dot, MoreVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
-import type { ThreadType } from "~/server/db/schema";
+import type { ThreadType } from "~/server/db/types";
 import { api } from "~/trpc/react";
 import Link from "next/link";
 export default function FileList(props: { initialThreads: ThreadType[] }) {
@@ -18,7 +18,6 @@ export default function FileList(props: { initialThreads: ThreadType[] }) {
   const utils = api.useUtils();
   const { data: threads } = api.threads.getThreads.useQuery(undefined, {
     initialData: props.initialThreads,
-    refetchInterval: 5000,
   });
   const { mutate } = api.threads.deleteThread.useMutation({
     onSuccess: async () => {
