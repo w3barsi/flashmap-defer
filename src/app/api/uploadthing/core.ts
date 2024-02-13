@@ -1,36 +1,85 @@
 import { currentUser } from "@clerk/nextjs";
+import { eq } from "drizzle-orm";
+import OpenAI from "openai";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import { env } from "~/env";
+import { inngest } from "~/inngest/client";
+import { db } from "~/server/db";
+import { files, threads } from "~/server/db/schema";
 
 const f = createUploadthing();
 
-// FileRouter for your app, can contain multiple FileRoutes
+const openai = new OpenAI({
+  apiKey: env.OPENAI_KEY,
+});
+
 export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
   threadFileUpload: f({
     blob: { maxFileSize: "128MB", maxFileCount: 1 },
     pdf: { maxFileSize: "128MB", maxFileCount: 1 },
     text: { maxFileSize: "128MB", maxFileCount: 1 },
   })
-    // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
-      // This code runs on your server before upload
       const user = await currentUser();
-      console.log(user)
 
-      // If you throw, the user will not be able to upload
       if (!user) throw new UploadThingError("Unauthorized");
 
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      const { key, url, name } = file;
 
-      console.log("file url", file.url);
+      await db.insert(files).values({
+        key,
+        url,
+        name,
+        uploadedBy: metadata.userId,
+      });
 
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
+      let thread = await db
+        .insert(threads)
+        .values({
+          fileUrl: url,
+          createdBy: metadata.userId,
+        })
+        .returning();
+
+
+
+      const fileId = await openai.files.create({
+        file: await fetch(thread[0]!.fileUrl),
+        purpose: "assistants",
+      });
+
+      thread = await db
+        .update(threads)
+        .set({
+          openaiFileId: fileId.id,
+        })
+        .where(eq(threads.id, thread[0]!.id))
+        .returning();
+
+      console.log(thread);
+
+      await inngest.send({
+        name: "flashmap/create.cards",
+        data: {
+          threadId: thread[0]?.id,
+          fileId: fileId.id
+
+        },
+      });
+
+      await inngest.send({
+        name: "flashmap/create.mindmap",
+        data: {
+          threadId: thread[0]?.id,
+          fileId: fileId.id
+
+        },
+      });
+
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;

@@ -1,0 +1,1 @@
+ALTER TABLE web_thread ADD `openai_file_id` text;

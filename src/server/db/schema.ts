@@ -1,7 +1,7 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
-import { sql } from "drizzle-orm";
+import { relations, sql, InferSelectModel } from "drizzle-orm";
 import {
   index,
   int,
@@ -9,6 +9,7 @@ import {
   sqliteTableCreator,
   text,
 } from "drizzle-orm/sqlite-core";
+import { createId } from "~/utils/id";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -22,32 +23,66 @@ export const test = createTable("test", {
   test: text("test"),
 });
 
-export const threads = createTable("thread", {
-  id: text("id", { length: 255 }).primaryKey(),
-  title: text("title", { length: 255 }),
-  isDeleted: integer("isDeleted", { mode: "boolean" }).default(false),
-  fileKey: text("key", { length: 255 }).notNull(),
 
-  flashcardStatus: text("flashcardStatus", {
-    enum: ["none", "creating", "created"],
-  }),
-  mindmapStatus: text("mindmapStatus", {
-    enum: ["none", "creating", "created"],
-  }),
-  pretestStatus: text("pretestStatus", {
-    enum: ["none", "creating", "created"],
-  }),
-  posttestStatus: text("posttestStatus", {
-    enum: ["none", "creating", "created"],
-  }),
-
-  createdBy: text("uploadedBy", { length: 255 }).notNull(),
+export const mindmap = createTable("mindmap", {
+  id: text("id", { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  markdown: text("markdown").notNull(),
+  threadId: text("threadId", { length: 255 }).notNull(),
 
   createdAt: int("created_at", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: int("updatedAt", { mode: "timestamp" }),
+  updatedAt: int("updated_at", { mode: "timestamp" }),
 });
+
+export const flashcards = createTable("flashcard", {
+  id: text("id", { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  keyword: text("keyword").notNull(),
+  definition: text("definition").notNull(),
+  threadId: text("thread_id", { length: 255 }).notNull(),
+
+  createdAt: int("created_at", { mode: "timestamp" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: int("updated_at", { mode: "timestamp" }),
+});
+
+export const threads = createTable("thread", {
+  id: text("id", { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  title: text("title", { length: 255 }),
+  isDeleted: integer("is_deleted", { mode: "boolean" }).default(false),
+  fileUrl: text("file_url", { length: 255 }).notNull(),
+  openaiFileId: text("openai_file_id"),
+  assistantId: text("assistant_id"),
+
+  flashcardStatus: text("flashcard_status", {
+    enum: ["none", "creating", "created", "error"],
+  }).default("creating"),
+  mindmapStatus: text("mindmap_status", {
+    enum: ["none", "creating", "created", "error"],
+  }).default("creating"),
+  testStatus: text("test_status", {
+    enum: ["none", "creating", "created", "error"],
+  }).default("creating"),
+
+  preTestScore: integer("pretest_score"),
+  postTestScore: integer("posttest_score"),
+
+  createdBy: text("uploaded_by", { length: 255 }).notNull(),
+
+  createdAt: int("created_at", { mode: "timestamp" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: int("updated_at", { mode: "timestamp" }),
+});
+
+export type ThreadType = InferSelectModel<typeof threads>
 
 export const files = createTable(
   "file",

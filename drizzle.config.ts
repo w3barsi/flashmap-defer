@@ -9,5 +9,6 @@ export default {
     url: env.TURSO_DATABASE_URL,
     authToken: env.TURSO_AUTH_TOKEN,
   },
+  out: "./drizzle",
   tablesFilter: ["web_*"],
 } satisfies Config;

@@ -15,6 +15,7 @@ export const env = createEnv({
     TURSO_DATABASE_URL: z.string(),
     UPLOADTHING_SECRET: z.string(),
     UPLOADTHING_APP_ID: z.string(),
+    OPENAI_KEY: z.string(),
   },
 
   /**
@@ -36,7 +37,8 @@ export const env = createEnv({
     TURSO_AUTH_TOKEN: process.env.TURSO_AUTH_TOKEN,
     TURSO_DATABASE_URL: process.env.TURSO_DATABASE_URL,
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
-    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID
+    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
+    OPENAI_KEY: process.env.OPENAI_KEY
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

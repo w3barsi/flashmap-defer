@@ -7,6 +7,7 @@ export default authMiddleware({
   publicRoutes: [
     "/api/clerk",
     "/api/inngest",
+    "/api/uploadthing",
     "/.redwood/functions/inngest",
     "/.netlify/functions/inngest",
     "/x/inngest"
