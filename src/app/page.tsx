@@ -9,6 +9,7 @@ export default async function Home() {
   const threads = await api.threads.getThreads.query();
   console.log(threads);
 
+
   return (
     <main className="flex min-h-screen flex-col items-center bg-white p-3 transition-all">
       <MaxWidthWrapper className="flex justify-between h-12 items-center">
