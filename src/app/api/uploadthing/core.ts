@@ -47,10 +47,13 @@ export const ourFileRouter = {
 
 
 
+      console.log(">>> CREATING FILE!!!")
       const fileId = await openai.files.create({
         file: await fetch(thread[0]!.fileUrl),
         purpose: "assistants",
       });
+      console.log("<<< CREATED FILE")
+
 
       thread = await db
         .update(threads)
@@ -60,6 +63,7 @@ export const ourFileRouter = {
         .where(eq(threads.id, thread[0]!.id))
         .returning();
 
+      console.log("EXECUTING THREADS")
       console.log(thread);
 
       await inngest.send({
