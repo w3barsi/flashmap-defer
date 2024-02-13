@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs";
 import OpenAI from "openai";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import createCards from "~/defer/createCards";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { files } from "~/server/db/schema";
@@ -36,6 +37,7 @@ export const ourFileRouter = {
         uploadedBy: metadata.userId,
       });
 
+      await createCards({fileUrl: url, userId: metadata.userId})
 
       console.log(">>> end of onUploadComplete");
     }),
