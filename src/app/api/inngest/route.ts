@@ -7,5 +7,4 @@ import { createCards, createFile, createMindmap } from "~/inngest/functions";
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [createCards, createMindmap, createFile],
-  streaming: "allow"
 });

@@ -11,7 +11,7 @@ import {
   saveMindmapToDb,
   updateThreadTitle,
   waitForThreadRun,
-} from "./utils";
+} from "~/utils/openai";
 import { db } from "~/server/db";
 import { threads } from "~/server/db/schema";
 import { eq } from "drizzle-orm";

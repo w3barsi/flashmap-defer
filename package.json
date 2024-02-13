@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.7",
+    "@defer/client": "^2.1.0",
     "@formkit/auto-animate": "^0.8.1",
     "@libsql/client": "^0.4.3",
     "@paralleldrive/cuid2": "^2.2.2",

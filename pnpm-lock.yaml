@@ -8,6 +8,9 @@ dependencies:
   '@clerk/nextjs':
     specifier: ^4.29.7
     version: 4.29.7(next@14.1.0)(react-dom@18.2.0)(react@18.2.0)
+  '@defer/client':
+    specifier: ^2.1.0
+    version: 2.1.0
   '@formkit/auto-animate':
     specifier: ^0.8.1
     version: 0.8.1
@@ -257,6 +260,13 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       csstype: 3.1.1
+    dev: false
+
+  /@defer/client@2.1.0:
+    resolution: {integrity: sha512-woXJHgP0V9Il1tLyH0csCABdjmp0o0YQEhF2yOVoXUqXJ13CsL0soU1Dp9uKcG3nISbm2LVPHw6dZBdQw1ZHQQ==}
+    engines: {node: '>=18'}
+    dependencies:
+      parse-duration: 1.1.0
     dev: false
 
   /@drizzle-team/studio@0.0.39:
@@ -5150,6 +5160,10 @@ packages:
     dependencies:
       callsites: 3.1.0
     dev: true
+
+  /parse-duration@1.1.0:
+    resolution: {integrity: sha512-z6t9dvSJYaPoQq7quMzdEagSFtpGu+utzHqqxmpVWNNZRIXnvqyCvn9XsTdh7c/w0Bqmdz3RB3YnRaKtpRtEXQ==}
+    dev: false
 
   /parse5-htmlparser2-tree-adapter@7.0.0:
     resolution: {integrity: sha512-B77tOZrqqfUfnVcOrUvfdLbz4pu4RopLD/4vmu3HUPswwTA8OH0EMW9BlWR2B0RCoiZRAHEUu7IxeP1Pd1UU+g==}
