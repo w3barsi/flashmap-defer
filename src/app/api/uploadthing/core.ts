@@ -39,7 +39,11 @@ export const ourFileRouter = {
       });
 
       await inngest.send({
-        name: "test-timeout",
+        name: "flashmap/create.openai-file",
+        data: {
+          fileUrl: url,
+          userId: metadata.userId
+        },
       });
 
       console.log(">>> end of onUploadComplete");

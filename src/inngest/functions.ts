@@ -83,6 +83,7 @@ export const createFile = inngest.createFunction(
         return { dbThreadId: thread[0]?.id, fileId: fileId.id };
       },
     );
+
     await step.sendEvent("sendEvent-create-cards", {
       name: "flashmap/create.cards",
       data: {
