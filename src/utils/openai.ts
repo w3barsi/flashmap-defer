@@ -62,11 +62,17 @@ export const saveMindmapToDb = async (threadId: string, dbThreadId: string) => {
   console.log(messages[0].content);
 
   let content = messages[0].content;
-  if (content.startsWith("```")) {
-    content = content.slice(3)
+
+  if (content.startsWith("```markdown\n")) {
+    content = content.slice(13);
+  } else if (content.startsWith("```")) {
+    content = content.slice(3);
   }
-  if(content.endsWith("```")){
-    content = content.slice(0, -3)
+
+  if (content.endsWith("```\n")) {
+    content = content.slice(0, -5);
+  }else if (content.endsWith("```\n")) {
+    content = content.slice(0, -3);
   }
 
   console.log(content);
