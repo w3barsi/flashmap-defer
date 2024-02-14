@@ -32,6 +32,18 @@ const openai = new OpenAI({
 //   },
 // );
 //
+//
+
+export const testTimeout = inngest.createFunction(
+  { id: "test-timeout" },
+  { event: "test-timeout" },
+  async ({ step }) => {
+    console.log("Starting step");
+    await step.sleep("sleep-for-20-seconds", "20 seconds");
+    console.log("Ending step");
+  },
+);
+
 export const createFile = inngest.createFunction(
   { id: "create-file" },
   { event: "flashmap/create.openai-file" },
@@ -75,7 +87,7 @@ export const createFile = inngest.createFunction(
       name: "flashmap/create.cards",
       data: {
         threadId: dbThreadId,
-        fileId
+        fileId,
       },
     });
 
@@ -83,7 +95,7 @@ export const createFile = inngest.createFunction(
       name: "flashmap/create.mindmap",
       data: {
         threadId: dbThreadId,
-        fileId
+        fileId,
       },
     });
   },
