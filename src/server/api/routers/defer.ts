@@ -2,7 +2,7 @@ import { inngest } from "~/inngest/client";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
-export const inngestRouter = createTRPCRouter({
+export const deferRouter = createTRPCRouter({
   hello: publicProcedure
     .mutation(async () => {
       await inngest.send({

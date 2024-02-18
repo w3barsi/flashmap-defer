@@ -1,7 +1,7 @@
 import { postRouter } from "~/server/api/routers/post";
 import { clerkRouter } from "~/server/api/routers/clerk";
 import { createTRPCRouter } from "~/server/api/trpc";
-import { inngestRouter } from "./routers/inngest";
+import { deferRouter } from "./routers/defer";
 import { threadsRouter } from "./routers/threads";
 
 /**
@@ -12,7 +12,7 @@ import { threadsRouter } from "./routers/threads";
 export const appRouter = createTRPCRouter({
   post: postRouter,
   clerk: clerkRouter,
-  inngest: inngestRouter,
+  inngest: deferRouter,
   threads: threadsRouter
 });
 
