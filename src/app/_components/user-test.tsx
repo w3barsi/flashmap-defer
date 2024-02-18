@@ -5,12 +5,11 @@ import { api } from "~/trpc/react";
 
 export default function UserTest() {
   const { user } = useUser();
-  const {mutate} = api.inngest.hello.useMutation()
 
   return (
     <div>
       <div>
-        <Button onClick={() => mutate()}>Inngest</Button>
+        <Button >Inngest</Button>
       </div>
     </div>
   );

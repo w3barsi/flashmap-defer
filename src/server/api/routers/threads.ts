@@ -2,28 +2,28 @@ import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { flashcards, mindmap, threads } from "~/server/db/schema";
+import { flashcards, mindmap, entries } from "~/server/db/schema";
 
 export const threadsRouter = createTRPCRouter({
   getThreads: protectedProcedure.query(({ ctx }) => {
     const val = ctx.db
       .select()
-      .from(threads)
+      .from(entries)
       .where(
         and(
-          eq(threads.createdBy, ctx.session.userId),
-          ne(threads.isDeleted, true),
+          eq(entries.createdBy, ctx.session.userId),
+          ne(entries.isDeleted, true),
         ),
       );
     return val;
   }),
   getCards: protectedProcedure
-    .input(z.object({ threadId: z.string() }))
+    .input(z.object({ entryId: z.string() }))
     .query(({ ctx, input }) => {
       const val = ctx.db
         .select()
         .from(flashcards)
-        .where(and(eq(flashcards.threadId, input.threadId)));
+        .where(and(eq(flashcards.entryId, input.entryId)));
       return val;
     }),
   getMindmapMarkdown: protectedProcedure
@@ -40,8 +40,8 @@ export const threadsRouter = createTRPCRouter({
     .input(z.object({ threadId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.db
-        .update(threads)
+        .update(entries)
         .set({ isDeleted: true })
-        .where(eq(threads.id, input.threadId));
+        .where(eq(entries.id, input.threadId));
     }),
 });

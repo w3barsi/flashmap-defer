@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { flashcards, mindmap, threads } from "~/server/db/schema";
+import { flashcards, mindmap, entries } from "~/server/db/schema";
 
 const openai = new OpenAI({
   apiKey: env.OPENAI_KEY,
@@ -39,9 +39,9 @@ export const saveCardsToDb = async (threadId: string, dbThreadId: string) => {
   });
 
   await db
-    .update(threads)
+    .update(entries)
     .set({ flashcardStatus: "created" })
-    .where(eq(threads.id, dbThreadId));
+    .where(eq(entries.id, dbThreadId));
 };
 
 export const saveMindmapToDb = async (threadId: string, dbThreadId: string) => {
@@ -79,9 +79,9 @@ export const saveMindmapToDb = async (threadId: string, dbThreadId: string) => {
   await db.insert(mindmap).values({ markdown: content, threadId: dbThreadId });
 
   await db
-    .update(threads)
+    .update(entries)
     .set({ mindmapStatus: "created" })
-    .where(eq(threads.id, dbThreadId));
+    .where(eq(entries.id, dbThreadId));
 };
 
 export const updateThreadTitle = async (
@@ -105,9 +105,9 @@ export const updateThreadTitle = async (
     }
     console.log("UPDATING");
     await db
-      .update(threads)
+      .update(entries)
       .set({ title: messages[0].content })
-      .where(eq(threads.id, dbThreadId));
+      .where(eq(entries.id, dbThreadId));
   } catch (e) {
     throw new Error("[TITLE] An Error occured while trying to update db.");
   }

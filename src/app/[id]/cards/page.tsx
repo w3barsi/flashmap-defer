@@ -9,7 +9,8 @@ import { api } from "~/trpc/react";
 
 export default function Page({ params }: { params: { id: string } }) {
   const id = params.id;
-  const { data } = api.threads.getCards.useQuery({ threadId: id });
+  const { data } = api.threads.getCards.useQuery({ entryId: id });
+  console.log(data)
   return (
     <div className="flex h-screen snap-y snap-mandatory flex-col overflow-y-scroll ">
       {data?.map((d, i) => {

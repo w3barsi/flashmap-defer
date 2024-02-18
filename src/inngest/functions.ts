@@ -13,7 +13,7 @@ import {
   waitForThreadRun,
 } from "~/utils/openai";
 import { db } from "~/server/db";
-import { threads } from "~/server/db/schema";
+import { entries } from "~/server/db/schema";
 import { eq } from "drizzle-orm";
 
 const openai = new OpenAI({
@@ -60,7 +60,7 @@ export const createFile = inngest.createFunction(
         const { fileUrl, userId } = validatedData;
 
         let thread = await db
-          .insert(threads)
+          .insert(entries)
           .values({
             fileUrl,
             createdBy: userId,
@@ -73,11 +73,11 @@ export const createFile = inngest.createFunction(
         });
 
         thread = await db
-          .update(threads)
+          .update(entries)
           .set({
             openaiFileId: fileId.id,
           })
-          .where(eq(threads.id, thread[0]!.id))
+          .where(eq(entries.id, thread[0]!.id))
           .returning();
 
         return { dbThreadId: thread[0]?.id, fileId: fileId.id };

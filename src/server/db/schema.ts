@@ -42,7 +42,7 @@ export const flashcards = createTable("flashcard", {
     .primaryKey(),
   keyword: text("keyword").notNull(),
   definition: text("definition").notNull(),
-  threadId: text("thread_id", { length: 255 }).notNull(),
+  entryId: text("entry_id", { length: 255 }).notNull(),
 
   createdAt: int("created_at", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
@@ -50,30 +50,42 @@ export const flashcards = createTable("flashcard", {
   updatedAt: int("updated_at", { mode: "timestamp" }),
 });
 
-export const threads = createTable("thread", {
+export const entries = createTable("entry", {
   id: text("id", { length: 255 })
     .$defaultFn(() => createId())
     .primaryKey(),
   title: text("title", { length: 255 }),
   isDeleted: integer("is_deleted", { mode: "boolean" }).default(false),
-  fileUrl: text("file_url", { length: 255 }).notNull(),
-  openaiFileId: text("openai_file_id"),
-  assistantId: text("assistant_id"),
+  createdBy: text("uploaded_by", { length: 255 }).notNull(),
 
+  fileS3Url: text("file_s3_url", { length: 255 }).notNull(),
+
+  openaiFileId: text("openai_file_id"),
+  openaiThreadId: text("openai_thread_id"),
+  openaiAssistantId: text("assistant_id"),
+
+  creationStatus: text("creation_status", {
+    enum: ["error", "flashcards", "mindmap", "title", "quiz"],
+  }).default("flashcards"),
+
+  fileStatus: text("file_status", {
+    enum: ["created", "error"],
+  }).default("created"),
   flashcardStatus: text("flashcard_status", {
-    enum: ["none", "creating", "created", "error"],
-  }).default("creating"),
+    enum: ["pending", "creating", "created", "error"],
+  }).default("pending"),
   mindmapStatus: text("mindmap_status", {
-    enum: ["none", "creating", "created", "error"],
-  }).default("creating"),
+    enum: ["pending", "creating", "created", "error"],
+  }).default("pending"),
   testStatus: text("test_status", {
-    enum: ["none", "creating", "created", "error"],
-  }).default("creating"),
+    enum: ["pending", "creating", "created", "error"],
+  }).default("pending"),
+  quizStatus: text("quiz_status", {
+    enum: ["pending", "creating", "created", "error"],
+  }).default("pending"),
 
   preTestScore: integer("pretest_score"),
   postTestScore: integer("posttest_score"),
-
-  createdBy: text("uploaded_by", { length: 255 }).notNull(),
 
   createdAt: int("created_at", { mode: "timestamp" })
     .default(sql`CURRENT_TIMESTAMP`)
@@ -96,21 +108,6 @@ export const files = createTable(
     updatedAt: int("updatedAt", { mode: "timestamp" }),
   },
   (file) => ({
-    id: index("key_idx").on(file.key),
-  }),
-);
-
-export const posts = createTable(
-  "post",
-  {
-    id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name", { length: 256 }),
-    createdAt: int("created_at", { mode: "timestamp" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: int("updatedAt", { mode: "timestamp" }),
-  },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
+    keyIndex: index("key_index").on(file.key),
   }),
 );

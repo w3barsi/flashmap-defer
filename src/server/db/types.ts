@@ -1,4 +1,4 @@
 import { type InferSelectModel } from "drizzle-orm";
-import type { threads } from "./schema";
+import type { entries } from "./schema";
 
-export type ThreadType = InferSelectModel<typeof threads>;
+export type ThreadType = InferSelectModel<typeof entries>;

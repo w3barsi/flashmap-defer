@@ -5,6 +5,8 @@ import { UploadThingError } from "uploadthing/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { files } from "~/server/db/schema";
+import createEntry from "~/defer/flashmap"
+import waitTen from "~/defer/test"
 
 const f = createUploadthing();
 
@@ -35,6 +37,12 @@ export const ourFileRouter = {
         name,
         uploadedBy: metadata.userId,
       });
+
+      await createEntry({
+        fileS3Url: url,
+        userId: metadata.userId
+      })
+      await waitTen()
 
 
       console.log(">>> end of onUploadComplete");

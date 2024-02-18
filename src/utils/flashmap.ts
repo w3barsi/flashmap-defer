@@ -1,0 +1,116 @@
+import { eq } from "drizzle-orm";
+import type OpenAI from "openai";
+import { z } from "zod";
+import { db } from "~/server/db";
+import { entries, flashcards, mindmap } from "~/server/db/schema";
+
+export async function waitForRun(
+  openai: OpenAI,
+  props: {
+    runId: string;
+    threadId: string;
+  },
+) {
+  let completedRun = await openai.beta.threads.runs.retrieve(
+    props.threadId,
+    props.runId,
+  );
+
+  while (
+    completedRun.status === "in_progress" ||
+    completedRun.status === "queued"
+  ) {
+    completedRun = await openai.beta.threads.runs.retrieve(
+      props.threadId,
+      props.runId,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2_000));
+  }
+
+  if (completedRun.status !== "completed") {
+    console.log("Run status:", completedRun.status);
+  }
+  return completedRun.status === "completed" ? "completed" : "error";
+}
+
+export const saveCardsToDb = async (
+  openai: OpenAI,
+  props: { threadId: string; entryId: string },
+) => {
+  const listMessages = await openai.beta.threads.messages.list(props.threadId);
+  const messages = listMessages.data.map((d) => {
+    const role = d.role;
+    const createdAt = d.created_at;
+    const content =
+      d?.content[0]!.type === "text" ? d.content[0].text.value : null;
+    return { role, content, createdAt };
+  });
+
+  if (!messages[0]?.content) {
+    throw new Error("NO MESSAGES");
+  }
+  const splitted = messages[0].content.split("\n").map((r) => r);
+  const parsed = splitted.slice(1, splitted.length - 1).join("");
+  const flashcardDataSchema = z.array(
+    z.object({ keyword: z.string(), definition: z.string() }),
+  );
+
+  const flashcardData = flashcardDataSchema.parse(JSON.parse(parsed));
+
+  console.log(flashcardData);
+  for (const d of flashcardData) {
+    await db.insert(flashcards).values({
+      keyword: d.keyword,
+      definition: d.definition,
+      entryId: props.entryId,
+    });
+  }
+
+  await db
+    .update(entries)
+    .set({ flashcardStatus: "created" })
+    .where(eq(entries.id, props.entryId));
+};
+
+export async function saveMindmapToDb(
+  openai: OpenAI,
+  props: { threadId: string; entryId: string },
+) {
+  const listMessages = await openai.beta.threads.messages.list(props.threadId);
+  const messages = listMessages.data.map((d) => {
+    const role = d.role;
+    const createdAt = d.created_at;
+    const fileId = d.file_ids;
+    console.log(fileId);
+    const content =
+      d?.content[0]!.type === "text" ? d.content[0].text.value : null;
+    return { role, content, createdAt };
+  });
+
+  if (!messages[0]?.content) {
+    throw new Error("NO MESSAGES");
+  }
+  console.log(messages[0].content);
+
+  let content = messages[0].content;
+
+  if (content.startsWith("```markdown\n")) {
+    content = content.slice(13);
+  } else if (content.startsWith("```")) {
+    content = content.slice(3);
+  }
+
+  if (content.endsWith("```\n")) {
+    content = content.slice(0, -5);
+  } else if (content.endsWith("```\n")) {
+    content = content.slice(0, -3);
+  }
+
+  console.log(content);
+  await db.insert(mindmap).values({ markdown: content, threadId: props.entryId });
+
+  await db
+    .update(entries)
+    .set({ mindmapStatus: "created" })
+    .where(eq(entries.id, props.entryId));
+}
