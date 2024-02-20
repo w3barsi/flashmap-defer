@@ -115,7 +115,7 @@ export async function saveMindmapToDb(
 
   await db
     .update(entries)
-    .set({ mindmapStatus: "created" })
+    .set({ mindmapStatus: "created", creationStatus: "title" })
     .where(eq(entries.id, props.entryId));
 }
 
@@ -154,7 +154,7 @@ export async function updateThreadTitle(
 
     await db
       .update(entries)
-      .set({ title })
+      .set({ title, titleStatus: "created", creationStatus: "quiz" })
       .where(eq(entries.id, props.entryId));
   } catch (e) {
     throw new Error("[TITLE] An Error occured while trying to update db.");

@@ -92,14 +92,6 @@ async function createEntry(props: {
     entryId: entry.id,
   });
 
-  // Update Entry DB
-  entry = await db
-    .update(entries)
-    .set({ creationStatus: "mindmap" })
-    .where(eq(entries.id, props.entryId))
-    .returning()
-    .get();
-
   // Create Mindmap
   let ranThread;
 
@@ -149,10 +141,6 @@ async function createEntry(props: {
     entryId: entry.id,
   });
   // Update Entry DB
-  await db
-    .update(entries)
-    .set({ creationStatus: "title" })
-    .where(eq(entries.id, entry.id));
 
   // Create Title
   try {
