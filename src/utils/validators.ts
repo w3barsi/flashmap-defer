@@ -20,3 +20,11 @@ export const validateInngestCreateFileInput = (data: any): InngestCreateFileInpu
 export const validateThreadShape = (data: any): ThreadShape => {
   return ThreadShapeValidator.parse(data);
 };
+
+export const questionsSchema = z.object({
+  answers: z.array(z.number()),
+  quiz: z.array(z.object({
+    question: z.string(),
+    choices: z.array(z.string())
+  }))
+})

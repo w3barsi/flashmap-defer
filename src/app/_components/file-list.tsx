@@ -81,34 +81,40 @@ export default function FileList(props: { initialThreads: ThreadType[] }) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={cell.testStatus === "created" ? false : true}
+                disabled={cell.quizStatus === "created" ? false : true}
+                asChild
               >
-                <Dot
-                  className={cn(
-                    {
-                      "animate-pulse text-yellow-500":
-                        cell.testStatus === "creating",
-                    },
-                    { "text-green-500": cell.testStatus === "created" },
-                    { "text-red-500": cell.testStatus === "error" },
-                  )}
-                />
-                Pre-test
+                <Link href={`/${cell.id}/pretest`}>
+                  <Dot
+                    className={cn(
+                      {
+                        "animate-pulse text-yellow-500":
+                          cell.quizStatus === "creating",
+                      },
+                      { "text-green-500": cell.quizStatus === "created" },
+                      { "text-red-500": cell.quizStatus === "error" },
+                    )}
+                  />
+                  Pre-test
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-                disabled={cell.testStatus === "created" ? false : true}
+                disabled={cell.quizStatus === "created" ? false : true}
+                asChild
               >
-                <Dot
-                  className={cn(
-                    {
-                      "animate-pulse text-yellow-500":
-                        cell.testStatus === "creating",
-                    },
-                    { "text-green-500": cell.testStatus === "created" },
-                    { "text-red-500": cell.testStatus === "error" },
-                  )}
-                />
-                Post-test
+                <Link href={`/${cell.id}/posttest`}>
+                  <Dot
+                    className={cn(
+                      {
+                        "animate-pulse text-yellow-500":
+                          cell.quizStatus === "creating",
+                      },
+                      { "text-green-500": cell.quizStatus === "created" },
+                      { "text-red-500": cell.quizStatus === "error" },
+                    )}
+                  />
+                  Post-test
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => mutate({ threadId: cell.id })}

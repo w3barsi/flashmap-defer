@@ -50,6 +50,22 @@ export const flashcards = createTable("flashcard", {
   updatedAt: int("updated_at", { mode: "timestamp" }),
 });
 
+export const questions = createTable("quiestions", {
+  id: text("id", { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  entryId: text("entry_id", { length: 255 }).notNull(),
+
+  number: integer("number", {mode: "number"}).notNull(),
+  question: text("question").notNull(),
+  choices: text("choices").notNull(),
+
+  createdAt: int("created_at", { mode: "timestamp" })
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: int("updated_at", { mode: "timestamp" }),
+});
+
 export const entries = createTable("entry", {
   id: text("id", { length: 255 })
     .$defaultFn(() => createId())
@@ -84,6 +100,7 @@ export const entries = createTable("entry", {
     enum: ["pending", "creating", "created", "error"],
   }).default("pending"),
 
+  testAnswers: text("test_answers"),
   preTestScore: integer("pretest_score"),
   postTestScore: integer("posttest_score"),
 

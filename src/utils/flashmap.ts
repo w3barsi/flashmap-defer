@@ -2,7 +2,8 @@ import { eq } from "drizzle-orm";
 import type OpenAI from "openai";
 import { z } from "zod";
 import { db } from "~/server/db";
-import { entries, flashcards, mindmap } from "~/server/db/schema";
+import { entries, flashcards, mindmap, questions } from "~/server/db/schema";
+import { questionsSchema } from "./validators";
 
 export async function waitForRun(
   openai: OpenAI,
@@ -102,7 +103,6 @@ export async function saveMindmapToDb(
     content = content.slice(3);
   }
 
-
   if (content.endsWith("```\n")) {
     content = content.slice(0, -5);
   } else if (content.endsWith("```")) {
@@ -160,4 +160,68 @@ export async function updateThreadTitle(
   } catch (e) {
     throw new Error("[TITLE] An Error occured while trying to update db.");
   }
+}
+
+export async function saveQuestionsToDB(
+  openai: OpenAI,
+  props: { threadId: string; entryId: string },
+) {
+  const listMessages = await openai.beta.threads.messages.list(props.threadId);
+  const messages = listMessages.data.map((d) => {
+    const role = d.role;
+    const createdAt = d.created_at;
+    const fileId = d.file_ids;
+    console.log(fileId);
+    const content =
+      d?.content[0]!.type === "text" ? d.content[0].text.value : null;
+    return { role, content, createdAt };
+  });
+
+  if (!messages[0]?.content) {
+    throw new Error("NO MESSAGES");
+  }
+
+  let content = messages[0].content;
+
+  if (content.startsWith("```json\n")) {
+    content = content.slice(8);
+  } else if (content.startsWith("```")) {
+    content = content.slice(3);
+  }
+
+  if (content.endsWith("```\n")) {
+    content = content.slice(0, -5);
+  } else if (content.endsWith("```")) {
+    content = content.slice(0, -3);
+  }
+
+  const parsed = questionsSchema.parse(await JSON.parse(content));
+  const answers = JSON.stringify(parsed.answers);
+
+  console.log(answers);
+  await db
+    .update(entries)
+    .set({ testAnswers: answers })
+    .where(eq(entries.id, props.entryId));
+
+  for (const [index, value] of parsed.quiz.entries()) {
+    const stringifiedChoices = JSON.stringify(value.choices);
+    await db.insert(questions).values({
+      choices: stringifiedChoices,
+      question: value.question,
+      entryId: props.entryId,
+      number: index,
+    });
+  }
+  // await Promise.all(
+  //   parsed.quiz.map(async (q) => {
+  //     const stringifiedChoices = JSON.stringify(q.choices);
+  //     console.log(stringifiedChoices);
+  //     return await db.insert(questions).values({
+  //       choices: stringifiedChoices,
+  //       question: q.question,
+  //       entryId: props.entryId,
+  //     });
+  //   }),
+  // );
 }

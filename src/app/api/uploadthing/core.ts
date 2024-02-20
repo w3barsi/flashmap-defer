@@ -6,7 +6,7 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 import { entries, files } from "~/server/db/schema";
 import createEntry from "~/defer/flashmap"
-import waitTen from "~/defer/test"
+import createQuestions from "~/defer/questions"
 
 const f = createUploadthing();
 
@@ -50,6 +50,7 @@ export const ourFileRouter = {
         userId: metadata.userId,
         entryId: entry.id
       })
+
 
 
       console.log(">>> end of onUploadComplete");

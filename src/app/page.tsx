@@ -4,6 +4,7 @@ import FileList from "./_components/file-list";
 import MaxWidthWrapper from "./_components/max-width-wrapper";
 import { UserButton } from "@clerk/nextjs";
 import { Suspense } from "react";
+import TestButton from "./_components/test-button";
 
 export default async function Home() {
   const threads = await api.threads.getThreads.query();
@@ -25,6 +26,7 @@ export default async function Home() {
         <h1 className="p-3 pt-5 text-4xl">Uploaded Files:</h1>
         <FileList initialThreads={threads} />
       </MaxWidthWrapper>
+      <TestButton/>
     </main>
   );
 }

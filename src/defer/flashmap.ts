@@ -125,7 +125,7 @@ async function createEntry(props: {
   });
   console.log(">>> Mindmap to finished running");
 
-  // Save Flashcards to DB
+  // Save Mindmap to DB
   if (mindmapStatus === "error") {
     await db
       .update(entries)
@@ -140,7 +140,6 @@ async function createEntry(props: {
     threadId: flashcardRun.thread_id,
     entryId: entry.id,
   });
-  // Update Entry DB
 
   // Create Title
   try {
