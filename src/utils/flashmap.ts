@@ -9,6 +9,7 @@ export async function waitForRun(
   props: {
     runId: string;
     threadId: string;
+    runType: "flashcards" | "mindmap" | "title" | "quiz";
   },
 ) {
   let completedRun = await openai.beta.threads.runs.retrieve(
@@ -24,6 +25,7 @@ export async function waitForRun(
       props.threadId,
       props.runId,
     );
+    console.log(`Waiting of type ${props.runType}`);
     await new Promise((resolve) => setTimeout(resolve, 2_000));
   }
 
@@ -107,10 +109,54 @@ export async function saveMindmapToDb(
   }
 
   console.log(content);
-  await db.insert(mindmap).values({ markdown: content, threadId: props.entryId });
+  await db
+    .insert(mindmap)
+    .values({ markdown: content, threadId: props.entryId });
 
   await db
     .update(entries)
     .set({ mindmapStatus: "created" })
     .where(eq(entries.id, props.entryId));
+}
+
+export async function updateThreadTitle(
+  openai: OpenAI,
+  props: { threadId: string; entryId: string },
+) {
+  try {
+    const listMessages = await openai.beta.threads.messages.list(
+      props.threadId,
+    );
+    const messages = listMessages.data.map((d) => {
+      const role = d.role;
+      const createdAt = d.created_at;
+      const fileId = d.file_ids;
+      console.log(fileId);
+      const content =
+        d?.content[0]!.type === "text" ? d.content[0].text.value : null;
+      return { role, content, createdAt };
+    });
+
+    if (!messages[0]?.content) {
+      throw new Error("Error: No TITLE");
+    }
+    let title = messages[0].content;
+
+    // Removes leading and trailing quotaiton marks.
+    if (title.startsWith('"')) {
+      title = title.substring(1);
+    }
+    if (title.endsWith('"')) {
+      title = title.substring(0, title.length - 1);
+    }
+
+    console.log(`Title >>> ${title}`);
+
+    await db
+      .update(entries)
+      .set({ title })
+      .where(eq(entries.id, props.entryId));
+  } catch (e) {
+    throw new Error("[TITLE] An Error occured while trying to update db.");
+  }
 }

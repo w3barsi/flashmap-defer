@@ -4,7 +4,7 @@ import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { files } from "~/server/db/schema";
+import { entries, files } from "~/server/db/schema";
 import createEntry from "~/defer/flashmap"
 import waitTen from "~/defer/test"
 
@@ -38,11 +38,18 @@ export const ourFileRouter = {
         uploadedBy: metadata.userId,
       });
 
+      const entry = await db.insert(entries).values(
+        {
+          fileS3Url: url,
+          createdBy: metadata.userId,
+        }
+      ).returning().get()
+
       await createEntry({
         fileS3Url: url,
-        userId: metadata.userId
+        userId: metadata.userId,
+        entryId: entry.id
       })
-      await waitTen()
 
 
       console.log(">>> end of onUploadComplete");

@@ -77,7 +77,7 @@ export const entries = createTable("entry", {
   mindmapStatus: text("mindmap_status", {
     enum: ["pending", "creating", "created", "error"],
   }).default("pending"),
-  testStatus: text("test_status", {
+  titleStatus: text("title_status", {
     enum: ["pending", "creating", "created", "error"],
   }).default("pending"),
   quizStatus: text("quiz_status", {
