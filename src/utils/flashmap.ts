@@ -70,7 +70,7 @@ export const saveCardsToDb = async (
 
   await db
     .update(entries)
-    .set({ flashcardStatus: "created" })
+    .set({ flashcardStatus: "created", creationStatus: "mindmap" })
     .where(eq(entries.id, props.entryId));
 };
 
@@ -102,9 +102,10 @@ export async function saveMindmapToDb(
     content = content.slice(3);
   }
 
+
   if (content.endsWith("```\n")) {
     content = content.slice(0, -5);
-  } else if (content.endsWith("```\n")) {
+  } else if (content.endsWith("```")) {
     content = content.slice(0, -3);
   }
 
