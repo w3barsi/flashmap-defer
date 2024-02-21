@@ -1,13 +1,12 @@
+import { UserButton } from "@clerk/nextjs";
+import { Suspense } from "react";
 import { api } from "~/trpc/server";
 import FileDropzone from "./_components/dropzone";
 import FileList from "./_components/file-list";
 import MaxWidthWrapper from "./_components/max-width-wrapper";
-import { UserButton } from "@clerk/nextjs";
-import { Suspense } from "react";
-import TestButton from "./_components/test-button";
 
 export default async function Home() {
-  const threads = await api.threads.getThreads.query();
+  const threads = await api.threads.getEntries.query();
   console.log(threads);
 
 

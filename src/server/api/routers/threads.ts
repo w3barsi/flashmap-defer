@@ -5,9 +5,40 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { flashcards, mindmap, entries } from "~/server/db/schema";
 
 export const threadsRouter = createTRPCRouter({
-  getThreads: protectedProcedure.query(({ ctx }) => {
-    const val = ctx.db
-      .select()
+  getEntry: protectedProcedure
+    .input(z.object({ entryId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const val = await ctx.db
+        .select({
+          id: entries.id,
+          title: entries.title,
+          creationStatus: entries.creationStatus,
+          flashcardStatus: entries.flashcardStatus,
+          mindmapStatus: entries.mindmapStatus,
+          titleStatus: entries.titleStatus,
+          quizStatus: entries.quizStatus,
+        })
+        .from(entries)
+        .where(
+          and(
+            eq(entries.createdBy, ctx.session.userId),
+            ne(entries.isDeleted, true),
+            eq(entries.id, input.entryId)
+          ),
+        );
+      return val[0];
+    }),
+  getEntries: protectedProcedure.query(async ({ ctx }) => {
+    const val = await ctx.db
+      .select({
+        id: entries.id,
+        title: entries.title,
+        creationStatus: entries.creationStatus,
+        flashcardStatus: entries.flashcardStatus,
+        mindmapStatus: entries.mindmapStatus,
+        titleStatus: entries.titleStatus,
+        quizStatus: entries.quizStatus,
+      })
       .from(entries)
       .where(
         and(
