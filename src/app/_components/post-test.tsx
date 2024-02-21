@@ -14,7 +14,7 @@ export default function PostTest(props: { entryId: string }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<number[]>([4, 4, 4, 4]);
   const { data } = api.quiz.getQuestions.useQuery({ entryId: props.entryId });
-  const { mutate } = api.quiz.checkPretestScores.useMutation({
+  const { mutate } = api.quiz.checkPosttestScores.useMutation({
     onSuccess: () => {
       router.refresh();
     },

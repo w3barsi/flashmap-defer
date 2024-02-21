@@ -81,7 +81,7 @@ export const entries = createTable("entry", {
   openaiAssistantId: text("assistant_id"),
 
   creationStatus: text("creation_status", {
-    enum: ["error", "flashcards", "mindmap", "title", "quiz"],
+    enum: ["error", "flashcards", "mindmap", "title", "quiz", "done"],
   }).default("flashcards"),
 
   fileStatus: text("file_status", {

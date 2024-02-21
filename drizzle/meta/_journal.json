@@ -5,57 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1707753044233,
-      "tag": "0000_windy_wind_dancer",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1707754240407,
-      "tag": "0001_heavy_dazzler",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1707754312626,
-      "tag": "0002_damp_thundra",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1707754477310,
-      "tag": "0003_plain_captain_stacy",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1707755483299,
-      "tag": "0004_brainy_daimon_hellstrom",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1707757013734,
-      "tag": "0005_bitter_power_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1707764192033,
-      "tag": "0006_common_night_thrasher",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1707809362111,
-      "tag": "0007_hard_sir_ram",
+      "when": 1708488364010,
+      "tag": "0000_wide_gorilla_man",
       "breakpoints": true
     }
   ]

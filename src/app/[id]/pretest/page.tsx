@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
 import PreTest from "~/app/_components/pre-test";
 import { api } from "~/trpc/server";
 

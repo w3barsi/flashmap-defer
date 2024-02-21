@@ -1,1 +1,0 @@
-ALTER TABLE web_thread ADD `new` text;

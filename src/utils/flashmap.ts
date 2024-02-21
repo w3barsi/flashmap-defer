@@ -195,13 +195,19 @@ export async function saveQuestionsToDB(
     content = content.slice(0, -3);
   }
 
+  console.log(content);
+
   const parsed = questionsSchema.parse(await JSON.parse(content));
   const answers = JSON.stringify(parsed.answers);
 
   console.log(answers);
   await db
     .update(entries)
-    .set({ testAnswers: answers })
+    .set({
+      testAnswers: answers,
+      quizStatus: "created",
+      creationStatus: "done",
+    })
     .where(eq(entries.id, props.entryId));
 
   for (const [index, value] of parsed.quiz.entries()) {
@@ -213,6 +219,7 @@ export async function saveQuestionsToDB(
       number: index,
     });
   }
+
   // await Promise.all(
   //   parsed.quiz.map(async (q) => {
   //     const stringifiedChoices = JSON.stringify(q.choices);

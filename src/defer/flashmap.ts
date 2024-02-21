@@ -7,6 +7,7 @@ import { entries } from "~/server/db/schema";
 import {
   saveCardsToDb,
   saveMindmapToDb,
+  saveQuestionsToDB,
   updateThreadTitle,
   waitForRun,
 } from "~/utils/flashmap";
@@ -20,6 +21,7 @@ async function createEntry(props: {
   userId: string;
   entryId: string;
 }) {
+  console.time("<<<<<<<<<< ENTRY TIMER >>>>>>>>>>");
   const returned = await db
     .select()
     .from(entries)
@@ -199,10 +201,59 @@ async function createEntry(props: {
   //Where "answers" is an array of the index of the correct answers with the type of number.
   //Your reply must only be the JSON block and nothing else.`
   // === END OF PROMPT
-  // Create Wait for run to Finish
-  // Save Quiz to DB
-  // Update Entry DB
 
+  console.log(">>> Creating Questions");
+  try {
+    await openai.beta.threads.messages.create(flashcardRun.thread_id, {
+      role: "user",
+      content: `Hey, I need help.
+                Given the attached file, can you make a short multiple choice quiz with 4 choices for me?
+                It can at most have 10 questions. Format your answer in JSON with this shape:
+                \`\`\`ts
+                type QuizEntry = {
+                    question: string
+                    choices: number[]
+                }
+                type Quiz = {
+                    answers: string[],
+                    quiz: QuizEntry[]
+                }
+                \`\`\`
+                Where "answers" is an array of the index of the correct answers with the type of number.
+                Your reply must only be the JSON block and nothing else.`,
+    });
+    ranThread = await openai.beta.threads.runs.create(flashcardRun.thread_id, {
+      assistant_id: "asst_L1loiTWtWASq3gHHvC9GrIOb",
+    });
+  } catch (e) {
+    console.error(e);
+    await db
+      .update(entries)
+      .set({ mindmapStatus: "error", creationStatus: "error" })
+      .where(eq(entries.id, props.entryId));
+    throw new Error("There was an erorr creating/running mindmap!");
+  }
+  // Create Wait for run to Finish
+  const questionStatus = await waitForRun(openai, {
+    runId: ranThread.id,
+    threadId: flashcardRun.thread_id,
+    runType: "quiz",
+  });
+  // Save Quiz to DB
+  //
+  if (questionStatus === "error") {
+    await db
+      .update(entries)
+      .set({ mindmapStatus: "error", creationStatus: "error" })
+      .where(eq(entries.id, entry.id));
+    throw new Error("Failed to create flashcards!");
+  }
+  // Update Entry DB
+  await saveQuestionsToDB(openai, {
+    threadId: flashcardRun.thread_id,
+    entryId: "ujc78ujjr9fd",
+  });
+  console.timeEnd("<<<<<<<<<< ENTRY TIMER >>>>>>>>>>");
   return;
 }
 
