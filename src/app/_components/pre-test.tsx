@@ -14,45 +14,10 @@ const choicesSchema = z.array(z.string());
 export default function PreTest( props : {  entryId: string  }) {
   const router = useRouter()
   const [answers, setAnswers] = useState<number[]>([4, 4, 4, 4]);
-  // const { data } = api.quiz.getQuestions.useQuery({ entryId: props.entryId });
+  const { data } = api.quiz.getQuestions.useQuery({ entryId: props.entryId });
   const {mutate} = api.quiz.checkPretestScores.useMutation({onSuccess: () => {
     router.refresh()
   }})
-  const tempData = {
-    title: "Test Title",
-    questions: [
-      {
-        id: "hlkghwghnte2",
-        entryId: "ujc78ujjr9fd",
-        number: 0,
-        question: "What primarily concerns electronics?",
-        choices:
-          '["Mechanical engineering","Transistor and microchip circuit design","Food technology","Cosmology"]',
-      },
-      {
-        id: "c22u3cwurzr8",
-        entryId: "ujc78ujjr9fd",
-        number: 1,
-        question: "What is an example of an input device?",
-        choices: '["Keyboard","Speaker","Projector","Printer"]',
-      },
-      {
-        id: "y4jojthctdtv",
-        entryId: "ujc78ujjr9fd",
-        number: 2,
-        question: "What does an output device do?",
-        choices: `["Input data to the computer","Receive and translate information from the computer","Charge the computer","Cool down the computer's hardware"]`,
-      },
-      {
-        id: "r48ihfnrawj3",
-        entryId: "ujc78ujjr9fd",
-        number: 3,
-        question: "Which of the following is an output device?",
-        choices: '["Mouse","Headphones","Scanner","Webcam"]',
-      },
-    ],
-  };
-
   const onChoicesClick = (props: {
     questionNumber: number;
     answerIdx: number;
@@ -74,11 +39,11 @@ export default function PreTest( props : {  entryId: string  }) {
   return (
     <div>
       <MaxWidthWrapper className="flex flex-col text-3xl h-32 max-w-screen-md items-center justify-center">
-        <h1 className="font-extrabold">{tempData.title}</h1>
+        <h1 className="font-extrabold">{data?.title}</h1>
         <h3 className="font-semibold">[PRE-TEST]</h3>
       </MaxWidthWrapper>
       <div className="flex w-full flex-col gap-3">
-        {tempData?.questions.map((q, questionIdx) => {
+        {data?.questions.map((q, questionIdx) => {
           const choices = choicesSchema.parse(JSON.parse(q.choices));
           return (
             <MaxWidthWrapper
