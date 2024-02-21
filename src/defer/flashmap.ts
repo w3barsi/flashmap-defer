@@ -251,7 +251,7 @@ async function createEntry(props: {
   // Update Entry DB
   await saveQuestionsToDB(openai, {
     threadId: flashcardRun.thread_id,
-    entryId: "ujc78ujjr9fd",
+    entryId: props.entryId,
   });
   console.timeEnd("<<<<<<<<<< ENTRY TIMER >>>>>>>>>>");
   return;
