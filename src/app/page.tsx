@@ -6,7 +6,7 @@ import FileList from "./_components/file-list";
 import MaxWidthWrapper from "./_components/max-width-wrapper";
 
 export default async function Home() {
-  const threads = await api.threads.getEntries.query();
+  const threads = await api.threads.getAdminEntries.query();
   console.log(threads);
 
 

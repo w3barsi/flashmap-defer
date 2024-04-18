@@ -1,6 +1,6 @@
 import { clerkClient } from "@clerk/nextjs";
 import { TRPCError } from "@trpc/server";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import OpenAI from "openai";
 import { z } from "zod";
 import { env } from "~/env";
@@ -11,7 +11,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import { db } from "~/server/db";
-import { entries, questions } from "~/server/db/schema";
+import { entries, questions, testScores } from "~/server/db/schema";
 
 const getScore = (a: number[], b: number[]) => {
   let score = 0;
@@ -37,9 +37,9 @@ export const quizRouter = createTRPCRouter({
         .select()
         .from(questions)
         .where(eq(questions.entryId, entryId));
-      console.log(values);
+      // console.log(values);
       const retVal = { title: title?.title, questions: values };
-      console.log(retVal)
+      // console.log(retVal)
       return retVal
     }),
   checkPretestScores: protectedProcedure
@@ -49,18 +49,20 @@ export const quizRouter = createTRPCRouter({
         .select({ answers: entries.testAnswers })
         .from(entries)
         .where(eq(entries.id, input.entryId));
+
       if (!ret?.answers) {
         throw new TRPCError({
           message: "FAILED to get correct answers from DB",
           code: "NOT_FOUND",
         });
       }
+
       const correctAnswers = z.array(z.number()).parse(JSON.parse(ret.answers));
       const actualScore = getScore(correctAnswers, input.answers);
       await db
-        .update(entries)
+        .update(testScores)
         .set({ preTestScore: actualScore })
-        .where(eq(entries.id, input.entryId));
+        .where(and(eq(testScores.entryId, input.entryId), eq(testScores.scoredBy, ctx.session.userId)));
     }),
 
   checkPosttestScores: protectedProcedure
@@ -79,23 +81,34 @@ export const quizRouter = createTRPCRouter({
       const correctAnswers = z.array(z.number()).parse(JSON.parse(ret.answers));
       const actualScore = getScore(correctAnswers, input.answers);
       await db
-        .update(entries)
+        .update(testScores)
         .set({ postTestScore: actualScore })
-        .where(eq(entries.id, input.entryId));
+        .where(and(eq(testScores.entryId, input.entryId), eq(testScores.scoredBy, ctx.session.userId)));
     }),
   getScore: protectedProcedure
     .input(z.object({ entryId: z.string(), testType: z.enum(["pre", "post"]) }))
     .query(async ({ ctx, input }) => {
-      if (input.testType === "pre") {
-        return await ctx.db
-          .select({ score: entries.preTestScore })
-          .from(entries)
-          .where(eq(entries.id, input.entryId));
+      // first check if entry on testScores table exists
+      const exists = await ctx.db.select().from(testScores).where(eq(testScores.scoredBy, ctx.session.userId))
+      if (exists.length === 0) {
+        console.log("Does not exist")
+        const ret = await ctx.db.insert(testScores).values({ "scoredBy": ctx.session.userId, "entryId": input.entryId }).returning()
+        console.log(ret)
       }
 
+      // if ()
+
+
+      if (input.testType === "pre") {
         return await ctx.db
-          .select({ score: entries.postTestScore })
-          .from(entries)
-          .where(eq(entries.id, input.entryId));
+          .select({ score: testScores.preTestScore })
+          .from(testScores)
+          .where(and(eq(testScores.entryId, input.entryId), eq(testScores.scoredBy, ctx.session.userId)));
+      }
+
+      return await ctx.db
+        .select({ score: testScores.postTestScore })
+        .from(testScores)
+        .where(and(eq(testScores.entryId, input.entryId), eq(testScores.scoredBy, ctx.session.userId)));
     }),
 });

@@ -23,6 +23,18 @@ export const test = createTable("test", {
   test: text("test"),
 });
 
+export const testScores = createTable("test_scores", {
+  id: text("id", { length: 255 })
+    .$defaultFn(() => createId())
+    .primaryKey(),
+
+  scoredBy: text("scored_by", { length: 255 }).notNull(),
+  entryId: text("entry_id", { length: 255 }).notNull(),
+
+  preTestScore: integer("pretest_score"),
+  postTestScore: integer("posttest_score"),
+})
+
 export const mindmap = createTable("mindmap", {
   id: text("id", { length: 255 })
     .$defaultFn(() => createId())

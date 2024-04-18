@@ -28,6 +28,26 @@ export const threadsRouter = createTRPCRouter({
         );
       return val[0];
     }),
+  getAdminEntries: protectedProcedure.query(async ({ ctx }) => {
+    const val = await ctx.db
+      .select({
+        id: entries.id,
+        title: entries.title,
+        creationStatus: entries.creationStatus,
+        flashcardStatus: entries.flashcardStatus,
+        mindmapStatus: entries.mindmapStatus,
+        titleStatus: entries.titleStatus,
+        quizStatus: entries.quizStatus,
+      })
+      .from(entries)
+      .where(
+        and(
+          eq(entries.createdBy, "user_2cZv9XlqXoBTxgSJJSXAFMTEshF"),
+          ne(entries.isDeleted, true),
+        ),
+      );
+    return val;
+  }),
   getEntries: protectedProcedure.query(async ({ ctx }) => {
     const val = await ctx.db
       .select({
