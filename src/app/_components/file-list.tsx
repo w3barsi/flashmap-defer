@@ -13,13 +13,17 @@ import { cn } from "~/lib/utils";
 import type { FileList, ThreadType } from "~/server/db/types";
 import { api } from "~/trpc/react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 function FileListEntry(props: { entry: FileList }) {
+  const {user} = useUser()
+
   const utils = api.useUtils();
   const {
     data: entry,
     isFetching,
     isRefetching,
+    isError
   } = api.threads.getEntry.useQuery(
     { entryId: props.entry.id },
     {
@@ -30,6 +34,11 @@ function FileListEntry(props: { entry: FileList }) {
           : 5000,
     },
   );
+
+  if(isError){
+    console.log("FUUUUUUUUCK")
+  }
+
 
   const { mutate } = api.threads.deleteThread.useMutation({
     onSuccess: async () => {
@@ -133,12 +142,15 @@ function FileListEntry(props: { entry: FileList }) {
               Post-test
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem
+          {user?.id === "user_2cZv9XlqXoBTxgSJJSXAFMTEshF" ?
+            <DropdownMenuItem
             onClick={() => mutate({ threadId: entry!.id })}
             className="flex justify-center  bg-red-500 text-white focus:bg-red-400 focus:text-white"
-          >
+            >
             Delete
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+            : null
+          }
         </DropdownMenuContent>
       </DropdownMenu>
     </li>
